@@ -4,3 +4,4 @@ This folder contains the starting code for the [Firebase: Build a Real Time Web 
 
 If you'd like to jump directly to the end and see the finished code head to the [web](../web) directory.
 # Firebase-Chat
+# Firebase-Chat
