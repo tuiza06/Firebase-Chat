@@ -55,16 +55,23 @@ function FriendlyChat() {
 // Sets up shortcuts to Firebase features and initiate firebase auth.
 FriendlyChat.prototype.initFirebase = function() {
   // TODO(DEVELOPER): Initialize Firebase.
+
   this.auth = firebase.auth();
   this.database = firebase.database();
   this.storage = firebase.storage();
   // Initiates Firebase auth and listen to auth state changes.
   this.auth.onAuthStateChanged(this.onAuthStateChanged.bind(this));
+
 };
 
 // Loads chat messages history and listens for upcoming ones.
 FriendlyChat.prototype.loadMessages = function() {
   // TODO(DEVELOPER): Load and listens for new messages.
+
+
+  // Reference to the /messages/ database path.
+  this.messagesRef = this.database.ref('messages');
+  // Make sure we remove all previous listeners.
   this.messagesRef.off();
 
   // Loads the last 12 messages and listen for new ones.
@@ -74,6 +81,8 @@ FriendlyChat.prototype.loadMessages = function() {
   }.bind(this);
   this.messagesRef.limitToLast(12).on('child_added', setMessage);
   this.messagesRef.limitToLast(12).on('child_changed', setMessage);
+
+
 };
 
 // Saves a new message on the Firebase DB.
@@ -96,6 +105,7 @@ FriendlyChat.prototype.saveMessage = function(e) {
     }.bind(this)).catch(function(error) {
       console.error('Error writing new message to Firebase Database', error);
     });
+
   }
 };
 
@@ -104,7 +114,7 @@ FriendlyChat.prototype.setImageUrl = function(imageUri, imgElement) {
   imgElement.src = imageUri;
 
   // TODO(DEVELOPER): If image is on Firebase Storage, fetch image URL and set img element's src.
-  if (imageUri.startsWith('gs://')) {
+   if (imageUri.startsWith('gs://')) {
     imgElement.src = FriendlyChat.LOADING_IMAGE_URL; // Display a loading image first.
     this.storage.refFromURL(imageUri).getMetadata().then(function(metadata) {
       imgElement.src = metadata.downloadURLs[0];
@@ -112,6 +122,8 @@ FriendlyChat.prototype.setImageUrl = function(imageUri, imgElement) {
   } else {
     imgElement.src = imageUri;
   }
+
+  
 };
 
 // Saves a new message containing an image URI in Firebase.
@@ -135,6 +147,9 @@ FriendlyChat.prototype.saveImageMessage = function(event) {
   if (this.checkSignedInWithMessage()) {
 
     // TODO(DEVELOPER): Upload image to Firebase storage and add message.
+
+
+      // We add a message with a loading icon that will get updated with the shared image.
     var currentUser = this.auth.currentUser;
     this.messagesRef.push({
       name: currentUser.displayName,
@@ -153,13 +168,16 @@ FriendlyChat.prototype.saveImageMessage = function(event) {
         console.error('There was an error uploading a file to Firebase Storage:', error);
       });
     }.bind(this));
+ 
+
   }
 };
 
 // Signs-in Friendly Chat.
 FriendlyChat.prototype.signIn = function() {
   // TODO(DEVELOPER): Sign in Firebase with credential from the Google user.
-  var provider = new firebase.auth.GoogleAuthProvider();
+
+   var provider = new firebase.auth.GoogleAuthProvider();
   this.auth.signInWithPopup(provider);
 };
 
@@ -175,7 +193,6 @@ FriendlyChat.prototype.onAuthStateChanged = function(user) {
     // Get profile pic and user's name from the Firebase user object.
     var profilePicUrl = user.photoURL; // Only change these two lines!
     var userName = user.displayName;   // Only change these two lines!
-
 
     // Set the user's profile pic and name.
     this.userPic.style.backgroundImage = 'url(' + profilePicUrl + ')';
@@ -205,9 +222,11 @@ FriendlyChat.prototype.onAuthStateChanged = function(user) {
 // Returns true if user is signed-in. Otherwise false and displays a message.
 FriendlyChat.prototype.checkSignedInWithMessage = function() {
   /* TODO(DEVELOPER): Check if user is signed-in Firebase. */
+
   if (this.auth.currentUser) {
     return true;
   }
+
   // Display a message to the user using a Toast.
   var data = {
     message: 'You must sign-in first',
